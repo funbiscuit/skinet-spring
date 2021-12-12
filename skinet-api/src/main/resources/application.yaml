@@ -1,0 +1,20 @@
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5832/skinet?currentSchema=public
+    username: postgres
+    password: postgres
+
+server:
+  port: 5001
+  servlet:
+    context-path: /api
+
+  # generated with keytool -genkeypair -keyalg RSA -keysize 2048 -storetype PKCS12 -keystore dev-ssl.p12 -validity 365
+  ssl:
+    key-store: classpath:dev-ssl.p12
+    key-store-password: password
+    # PKCS12 or JKS
+    keyStoreType: PKCS12
+
+#security:
+#  require-ssl: true

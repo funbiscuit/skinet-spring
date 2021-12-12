@@ -1,0 +1,3 @@
+rootProject.name = 'skinet'
+
+include 'skinet-api'
