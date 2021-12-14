@@ -3,6 +3,8 @@ spring:
     url: jdbc:postgresql://localhost:5832/skinet?currentSchema=public
     username: postgres
     password: postgres
+  jpa:
+    show-sql: true
 
 server:
   port: 5001
