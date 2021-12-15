@@ -8,8 +8,6 @@ spring:
 
 server:
   port: 5001
-  servlet:
-    context-path: /api
 
   # generated with keytool -genkeypair -keyalg RSA -keysize 2048 -storetype PKCS12 -keystore dev-ssl.p12 -validity 365
   ssl:
@@ -20,3 +18,5 @@ server:
 
 #security:
 #  require-ssl: true
+app:
+  root-url: https://localhost:5001/
