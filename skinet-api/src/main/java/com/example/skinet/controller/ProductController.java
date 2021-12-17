@@ -3,11 +3,13 @@ package com.example.skinet.controller;
 import com.example.skinet.core.entity.ProductBrand;
 import com.example.skinet.core.entity.ProductDTO;
 import com.example.skinet.core.entity.ProductType;
+import com.example.skinet.error.ApiException;
 import com.example.skinet.service.ProductBrandService;
 import com.example.skinet.service.ProductService;
 import com.example.skinet.service.ProductTypeService;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -36,8 +38,9 @@ public class ProductController {
 
     @GetMapping("/{id}")
     public ResponseEntity<ProductDTO> getProduct(@PathVariable Integer id) {
-        return ResponseEntity.of(productService.getProduct(id)
-                .map(p -> modelMapper.map(p, ProductDTO.class)));
+        return ResponseEntity.ok(productService.getProduct(id)
+                .map(p -> modelMapper.map(p, ProductDTO.class))
+                .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND)));
     }
 
     @GetMapping("/brands")
