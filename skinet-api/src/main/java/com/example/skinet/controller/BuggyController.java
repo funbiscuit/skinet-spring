@@ -1,8 +1,13 @@
 package com.example.skinet.controller;
 
 import com.example.skinet.error.ApiException;
+import com.example.skinet.error.ExtendedErrorResponse;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import lombok.Data;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -10,7 +15,7 @@ import javax.validation.Valid;
 import javax.validation.constraints.NotBlank;
 
 @RestController
-@RequestMapping("/buggy")
+@RequestMapping(value = "/buggy", produces = {MediaType.APPLICATION_JSON_VALUE})
 public class BuggyController {
 
     @GetMapping("not-found")
@@ -33,6 +38,10 @@ public class BuggyController {
         throw new ApiException(HttpStatus.BAD_REQUEST);
     }
 
+    @ApiResponse(responseCode = "200", description = "Form is saved",
+            content = {@Content(schema = @Schema(implementation = TestForm.class))})
+    @ApiResponse(responseCode = "400", description = "Invalid form supplied",
+            content = {@Content(schema = @Schema(implementation = ExtendedErrorResponse.class))})
     @PostMapping("save")
     ResponseEntity<TestForm> saveModel(@Valid @RequestBody TestForm form) {
         return ResponseEntity.ok(form);

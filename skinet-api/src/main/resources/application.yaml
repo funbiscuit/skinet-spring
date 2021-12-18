@@ -22,3 +22,10 @@ server:
 #  require-ssl: true
 app:
   root-url: https://localhost:5001/
+
+springdoc:
+
+  swagger-ui:
+    path: /swagger-ui
+  api-docs:
+    path: /v3/docs

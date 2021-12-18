@@ -4,12 +4,17 @@ import com.example.skinet.core.entity.ProductBrand;
 import com.example.skinet.core.entity.ProductDTO;
 import com.example.skinet.core.entity.ProductType;
 import com.example.skinet.error.ApiException;
+import com.example.skinet.error.ErrorResponse;
 import com.example.skinet.service.ProductBrandService;
 import com.example.skinet.service.ProductService;
 import com.example.skinet.service.ProductTypeService;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -21,7 +26,7 @@ import java.util.stream.Collectors;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/products")
+@RequestMapping(value = "/products", produces = {MediaType.APPLICATION_JSON_VALUE})
 public class ProductController {
 
     private final ProductService productService;
@@ -36,6 +41,12 @@ public class ProductController {
                 .collect(Collectors.toList()));
     }
 
+    @ApiResponse(responseCode = "200", description = "Product is found",
+            content = {@Content(schema = @Schema(implementation = ProductDTO.class))})
+    @ApiResponse(responseCode = "400", description = "Invalid id supplied",
+            content = {@Content(schema = @Schema(implementation = ErrorResponse.class))})
+    @ApiResponse(responseCode = "404", description = "Product not found",
+            content = {@Content(schema = @Schema(implementation = ErrorResponse.class))})
     @GetMapping("/{id}")
     public ResponseEntity<ProductDTO> getProduct(@PathVariable Integer id) {
         return ResponseEntity.ok(productService.getProduct(id)
