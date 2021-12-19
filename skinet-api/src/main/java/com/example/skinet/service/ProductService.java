@@ -1,11 +1,13 @@
 package com.example.skinet.service;
 
 import com.example.skinet.core.entity.Product;
+import com.example.skinet.repo.ProductQueryParams;
 import com.example.skinet.repo.ProductRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
 import java.util.Optional;
 
 @RequiredArgsConstructor
@@ -17,8 +19,8 @@ public class ProductService {
         return productRepository.findById(id);
     }
 
-    public List<Product> getProducts() {
-        return productRepository.findAll();
+    public Page<Product> getProducts(Pageable pageable, ProductQueryParams params) {
+        return productRepository.getProducts(pageable, params);
     }
 
     public long productsCount() {

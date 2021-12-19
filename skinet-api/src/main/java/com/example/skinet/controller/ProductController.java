@@ -1,10 +1,12 @@
 package com.example.skinet.controller;
 
+import com.example.skinet.core.entity.Product;
 import com.example.skinet.core.entity.ProductBrand;
 import com.example.skinet.core.entity.ProductDTO;
 import com.example.skinet.core.entity.ProductType;
 import com.example.skinet.error.ApiException;
 import com.example.skinet.error.ErrorResponse;
+import com.example.skinet.repo.ProductQueryParams;
 import com.example.skinet.service.ProductBrandService;
 import com.example.skinet.service.ProductService;
 import com.example.skinet.service.ProductTypeService;
@@ -13,13 +15,14 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
+import org.springdoc.api.annotations.ParameterObject;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -35,10 +38,19 @@ public class ProductController {
     private final ModelMapper modelMapper;
 
     @GetMapping
-    public ResponseEntity<List<ProductDTO>> getProducts() {
-        return ResponseEntity.ok(productService.getProducts().stream()
+    public ResponseEntity<Page<ProductDTO>> getProducts(
+            @ParameterObject Pageable pageable,
+            @RequestParam(required = false) Integer brandId,
+            @RequestParam(required = false) Integer typeId,
+            @RequestParam(required = false) String search
+    ) {
+        ProductQueryParams params = new ProductQueryParams(brandId, typeId, search);
+        Page<Product> products = productService.getProducts(pageable, params);
+        return ResponseEntity.ok(new PageImpl<>(products
+                .stream()
                 .map(p -> modelMapper.map(p, ProductDTO.class))
-                .collect(Collectors.toList()));
+                .collect(Collectors.toList()),
+                pageable, products.getTotalElements()));
     }
 
     @ApiResponse(responseCode = "200", description = "Product is found",
