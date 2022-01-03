@@ -62,6 +62,9 @@ public class ProductRepositoryCustomImpl implements ProductRepositoryCustom {
 
         // count total to return inside Page
         CriteriaQuery<Long> countQuery = cb.createQuery(Long.class);
+        if (!predicates.isEmpty()) {
+            countQuery.where(predicates.toArray(new Predicate[0]));
+        }
         countQuery.select(cb.count(countQuery.from(Product.class)));
         long totalCount = entityManager.createQuery(countQuery).getSingleResult();
 
