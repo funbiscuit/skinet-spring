@@ -13,5 +13,28 @@ services:
       - "5832:5432"
     restart: unless-stopped
 
+  redis:
+    container_name: redis-db
+    image: redis:alpine
+    command: redis-server --save 20 1 --loglevel warning
+    volumes:
+      - redis:/data
+    ports:
+      - 6379:6379
+    restart: unless-stopped
+
+  redis-commander:
+    image: rediscommander/redis-commander:latest
+    environment:
+      - REDIS_HOSTS=local:redis:6379
+      - HTTP_USER=root
+      - HTTP_PASSWORD=root
+    ports:
+      - 8081:8081
+    depends_on:
+      - redis
+    restart: unless-stopped
+
 volumes:
   postgres:
+  redis:
