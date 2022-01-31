@@ -28,6 +28,10 @@ server:
 #  require-ssl: true
 app:
   root-url: https://localhost:5001/
+  jwt:
+    days-to-expire: 7
+    issuer: https://localhost:5001/
+    secret: BXcN6Ys6BKdWcdYPpuBKHe9leqS1Zl8ZBotvLd56h42uGC4nHm9fKce8a2kQVyx
 
 springdoc:
 

@@ -16,4 +16,14 @@ public class ApiException extends RuntimeException {
         this.statusCode = statusCode;
         this.message = message;
     }
+
+    public static ApiException emailNotFound(String email) {
+        return new ApiException(HttpStatus.BAD_REQUEST,
+                String.format("Email %s not found", email));
+    }
+
+    public static ApiException addressNotFound(String email) {
+        return new ApiException(HttpStatus.NOT_FOUND,
+                String.format("User %s does not have an address", email));
+    }
 }

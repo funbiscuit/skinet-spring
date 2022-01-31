@@ -4,6 +4,7 @@ import com.example.skinet.config.AppConfigProperties;
 import com.example.skinet.core.entity.Product;
 import com.example.skinet.core.entity.ProductDTO;
 import com.example.skinet.service.JsonDbImporter;
+import com.example.skinet.service.UsersInitializer;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.modelmapper.Converter;
 import org.modelmapper.ModelMapper;
@@ -15,6 +16,12 @@ import org.springframework.boot.context.properties.ConfigurationPropertiesScan;
 import org.springframework.context.annotation.Bean;
 import org.springframework.data.redis.core.RedisKeyValueAdapter.EnableKeyspaceEvents;
 import org.springframework.data.redis.repository.configuration.EnableRedisRepositories;
+import org.springframework.security.crypto.factory.PasswordEncoderFactories;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.web.servlet.LocaleResolver;
+import org.springframework.web.servlet.i18n.FixedLocaleResolver;
+
+import java.util.Locale;
 
 @SpringBootApplication
 // enable listening for keyspace events so entry keys are automatically removed
@@ -50,7 +57,21 @@ public class SkinetApplication {
     }
 
     @Bean
-    public CommandLineRunner dbInitializer(JsonDbImporter jsonDbImporter) {
-        return args -> jsonDbImporter.importData();
+    public LocaleResolver localeResolver() {
+        return new FixedLocaleResolver(Locale.ENGLISH);
+    }
+
+    @Bean
+    PasswordEncoder passwordEncoder() {
+        return PasswordEncoderFactories.createDelegatingPasswordEncoder();
+    }
+
+    @Bean
+    public CommandLineRunner dbInitializer(JsonDbImporter jsonDbImporter,
+                                           UsersInitializer usersInitializer) {
+        return args -> {
+            jsonDbImporter.importData();
+            usersInitializer.seedUsers();
+        };
     }
 }

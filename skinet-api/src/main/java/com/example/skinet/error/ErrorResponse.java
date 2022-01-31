@@ -21,6 +21,7 @@ public class ErrorResponse {
         return switch (statusCode) {
             case BAD_REQUEST -> "A bad request, you have made";
             case UNAUTHORIZED -> "Authorized, you are not";
+            case FORBIDDEN -> "Walking on thin ice you are";
             case NOT_FOUND -> "Resource found... NOT!";
             case INTERNAL_SERVER_ERROR -> "Errors are the path to the dark side. Errors lead to anger. Anger leads to hate. Hate leads to career change";
             default -> "";

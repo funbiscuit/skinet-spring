@@ -14,4 +14,19 @@ import javax.validation.constraints.NotBlank;
 public class AppConfigProperties {
     @NotBlank
     private String rootUrl;
+
+    private JwtConfigProperties jwt;
+
+    @Getter
+    @Setter
+    @Validated
+    public static class JwtConfigProperties {
+        @NotBlank
+        private String secret;
+
+        @NotBlank
+        private String issuer;
+
+        private int daysToExpire;
+    }
 }

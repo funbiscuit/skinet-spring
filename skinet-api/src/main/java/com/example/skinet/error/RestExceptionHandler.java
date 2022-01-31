@@ -6,6 +6,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.lang.NonNull;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -21,10 +23,15 @@ import static java.util.stream.Collectors.*;
 @RestControllerAdvice
 public class RestExceptionHandler extends ResponseEntityExceptionHandler {
 
+    private final Map<Class<? extends Exception>, HttpStatus> exceptionStatusMap = Map.of(
+            AccessDeniedException.class, HttpStatus.FORBIDDEN,
+            AuthenticationException.class, HttpStatus.UNAUTHORIZED
+    );
+
     @ExceptionHandler(value = {Exception.class})
     ResponseEntity<Object> handleAll(Exception ex, WebRequest request) {
         return handleExceptionInternal(ex, ex.getMessage(), new HttpHeaders(),
-                HttpStatus.INTERNAL_SERVER_ERROR, request);
+                mapExceptionToStatus(ex.getClass()), request);
     }
 
     @ExceptionHandler(value = {ApiException.class})
@@ -60,5 +67,14 @@ public class RestExceptionHandler extends ResponseEntityExceptionHandler {
         headers.setContentType(MediaType.APPLICATION_JSON);
         return super.handleExceptionInternal(ex, responseBody,
                 headers, status, request);
+    }
+
+    private HttpStatus mapExceptionToStatus(Class<? extends Exception> exceptionClass) {
+
+        return exceptionStatusMap.entrySet().stream()
+                .filter(e -> e.getKey().isAssignableFrom(exceptionClass))
+                .map(Map.Entry::getValue)
+                .findFirst()
+                .orElse(HttpStatus.INTERNAL_SERVER_ERROR);
     }
 }

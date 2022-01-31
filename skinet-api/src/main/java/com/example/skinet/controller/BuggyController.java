@@ -9,10 +9,12 @@ import lombok.Data;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.annotation.Secured;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 import javax.validation.constraints.NotBlank;
+import java.security.Principal;
 
 @RestController
 @RequestMapping(value = "/buggy", produces = {MediaType.APPLICATION_JSON_VALUE})
@@ -50,6 +52,22 @@ public class BuggyController {
     @GetMapping("bad-request/{id}")
     ResponseEntity<Integer> badRequestWithId(@PathVariable int id) {
         return ResponseEntity.ok(id);
+    }
+
+    @GetMapping("test-auth")
+    ResponseEntity<String> testAuth(Principal principal) {
+        return ResponseEntity.ok("Secret for " + principal.getName());
+    }
+
+    @GetMapping("test-auth-admin")
+    @Secured("ROLE_ADMIN")
+    ResponseEntity<String> testAuthAdmin(Principal principal) {
+        return ResponseEntity.ok("Super secret for " + principal.getName());
+    }
+
+    @GetMapping("test-auth2-admin")
+    ResponseEntity<String> testAuth2Admin(Principal principal) {
+        return ResponseEntity.ok("Super secret2 for " + principal.getName());
     }
 
     @Data
