@@ -11,6 +11,8 @@ spring:
     web:
       pageable:
         max-page-size: 50
+  redis:
+    host: localhost
 
 server:
   port: 5001
