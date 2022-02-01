@@ -2,9 +2,11 @@ package com.example.skinet.controller;
 
 import com.example.skinet.error.ApiException;
 import com.example.skinet.error.ExtendedErrorResponse;
+import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import lombok.Data;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -55,17 +57,20 @@ public class BuggyController {
     }
 
     @GetMapping("test-auth")
+    @Operation(security = {@SecurityRequirement(name = "bearer-key")})
     ResponseEntity<String> testAuth(Principal principal) {
         return ResponseEntity.ok("Secret for " + principal.getName());
     }
 
     @GetMapping("test-auth-admin")
     @Secured("ROLE_ADMIN")
+    @Operation(security = {@SecurityRequirement(name = "bearer-key")})
     ResponseEntity<String> testAuthAdmin(Principal principal) {
         return ResponseEntity.ok("Super secret for " + principal.getName());
     }
 
     @GetMapping("test-auth2-admin")
+    @Operation(security = {@SecurityRequirement(name = "bearer-key")})
     ResponseEntity<String> testAuth2Admin(Principal principal) {
         return ResponseEntity.ok("Super secret2 for " + principal.getName());
     }

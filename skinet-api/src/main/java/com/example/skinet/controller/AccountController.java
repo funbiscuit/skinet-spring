@@ -4,6 +4,8 @@ import com.example.skinet.core.entity.*;
 import com.example.skinet.error.ApiException;
 import com.example.skinet.service.AuthService;
 import com.example.skinet.service.UserService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.http.ResponseEntity;
@@ -22,6 +24,7 @@ public class AccountController {
     private final ModelMapper modelMapper;
 
     @GetMapping
+    @Operation(security = {@SecurityRequirement(name = "bearer-key")})
     public ResponseEntity<UserDTO> currentUser(Principal principal) {
         return ResponseEntity.ok(authService.getUserByEmail(principal.getName()));
     }
@@ -32,6 +35,7 @@ public class AccountController {
     }
 
     @GetMapping("address")
+    @Operation(security = {@SecurityRequirement(name = "bearer-key")})
     public ResponseEntity<AddressDTO> getAddress(Principal principal) {
         Address address = userService.getUser(principal.getName()).orElseThrow().getAddress();
         if (address == null) {
@@ -41,6 +45,7 @@ public class AccountController {
     }
 
     @PutMapping("address")
+    @Operation(security = {@SecurityRequirement(name = "bearer-key")})
     public ResponseEntity<AddressDTO> setAddress(Principal principal,
                                                  @RequestBody @Valid AddressDTO address) {
         Address newAddress = userService.setUserAddress(principal.getName(),
