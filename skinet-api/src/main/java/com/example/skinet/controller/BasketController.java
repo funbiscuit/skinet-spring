@@ -6,6 +6,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import javax.validation.Valid;
+
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("basket")
@@ -19,7 +21,7 @@ public class BasketController {
     }
 
     @PostMapping
-    public ResponseEntity<CustomerBasket> updateBasket(@RequestBody CustomerBasket basket) {
+    public ResponseEntity<CustomerBasket> updateBasket(@RequestBody @Valid CustomerBasket basket) {
         return ResponseEntity.ok(basketService.updateBasket(basket));
     }
 

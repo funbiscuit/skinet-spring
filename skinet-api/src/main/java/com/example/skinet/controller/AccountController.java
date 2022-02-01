@@ -1,16 +1,15 @@
 package com.example.skinet.controller;
 
-import com.example.skinet.core.entity.Address;
-import com.example.skinet.core.entity.LoginDTO;
-import com.example.skinet.core.entity.RegisterDTO;
-import com.example.skinet.core.entity.UserDTO;
+import com.example.skinet.core.entity.*;
 import com.example.skinet.error.ApiException;
 import com.example.skinet.service.AuthService;
 import com.example.skinet.service.UserService;
 import lombok.RequiredArgsConstructor;
+import org.modelmapper.ModelMapper;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import javax.validation.Valid;
 import java.security.Principal;
 
 @RestController
@@ -20,6 +19,7 @@ public class AccountController {
 
     private final AuthService authService;
     private final UserService userService;
+    private final ModelMapper modelMapper;
 
     @GetMapping
     public ResponseEntity<UserDTO> currentUser(Principal principal) {
@@ -32,18 +32,20 @@ public class AccountController {
     }
 
     @GetMapping("address")
-    public ResponseEntity<Address> getAddress(Principal principal) {
+    public ResponseEntity<AddressDTO> getAddress(Principal principal) {
         Address address = userService.getUser(principal.getName()).orElseThrow().getAddress();
         if (address == null) {
             throw ApiException.addressNotFound(principal.getName());
         }
-        return ResponseEntity.ok(address);
+        return ResponseEntity.ok(modelMapper.map(address, AddressDTO.class));
     }
 
     @PutMapping("address")
-    public ResponseEntity<Address> setAddress(Principal principal, @RequestBody Address address) {
-
-        return ResponseEntity.ok(userService.setUserAddress(principal.getName(), address));
+    public ResponseEntity<AddressDTO> setAddress(Principal principal,
+                                                 @RequestBody @Valid AddressDTO address) {
+        Address newAddress = userService.setUserAddress(principal.getName(),
+                modelMapper.map(address, Address.class));
+        return ResponseEntity.ok(modelMapper.map(newAddress, AddressDTO.class));
     }
 
     @PostMapping("login")
@@ -52,7 +54,7 @@ public class AccountController {
     }
 
     @PostMapping("register")
-    public ResponseEntity<UserDTO> register(@RequestBody RegisterDTO registerDTO) {
+    public ResponseEntity<UserDTO> register(@RequestBody @Valid RegisterDTO registerDTO) {
         return ResponseEntity.ok(authService.registerUser(registerDTO));
     }
 
