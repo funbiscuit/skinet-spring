@@ -9,7 +9,7 @@ import {Order} from "../../shared/models/order";
 })
 export class CheckoutSuccessComponent implements OnInit {
 
-  order!: Order
+  order?: Order
 
   constructor(private router: Router) {
     const navigation = this.router.getCurrentNavigation()
