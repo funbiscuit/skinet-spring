@@ -14,6 +14,7 @@ import org.springframework.security.core.userdetails.User;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
+import java.security.Principal;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.util.Date;
@@ -27,6 +28,10 @@ public class AuthService {
     private final AuthenticationManager authenticationManager;
     private final AppConfigProperties appConfigProperties;
     private final UserService userService;
+
+    public String getUserEmailFromPrincipal(Principal principal) {
+        return principal.getName();
+    }
 
     public UserDTO getUserByEmail(String email) {
         AppUser appUser = userService.getUser(email).orElseThrow(() -> ApiException.emailNotFound(email));

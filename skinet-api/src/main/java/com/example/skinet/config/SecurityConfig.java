@@ -55,6 +55,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .mvcMatchers("/api/account/register/**").permitAll()
                 .mvcMatchers("/api/account/email-exists/**").permitAll()
                 .mvcMatchers("/api/account/**").authenticated()
+                .mvcMatchers("/api/orders/**").authenticated()
                 .mvcMatchers("/api/buggy/test-auth2-admin/**").hasRole("ADMIN")
                 .anyRequest().permitAll();
     }

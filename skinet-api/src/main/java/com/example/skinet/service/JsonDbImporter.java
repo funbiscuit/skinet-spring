@@ -2,6 +2,7 @@ package com.example.skinet.service;
 
 import com.example.skinet.core.entity.ProductBrand;
 import com.example.skinet.core.entity.ProductType;
+import com.example.skinet.core.entity.order.DeliveryMethod;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.type.CollectionType;
 import lombok.RequiredArgsConstructor;
@@ -19,6 +20,9 @@ public class JsonDbImporter {
     private final ProductService productService;
     private final ProductTypeService typeService;
     private final ProductBrandService brandService;
+
+    private final OrderService orderService;
+
     private final ObjectMapper objectMapper;
 
     private final ResourceReader resourceReader;
@@ -38,6 +42,10 @@ public class JsonDbImporter {
         if (productService.productsCount() == 0) {
             String products = resourceReader.readString("classpath:db/data/products.json");
             importProducts(products);
+        }
+        if (orderService.getDeliveryMethodsCount() == 0) {
+            String deliveryMethods = resourceReader.readString("classpath:db/data/delivery.json");
+            importDeliveryMethods(deliveryMethods);
         }
     }
 
@@ -71,6 +79,18 @@ public class JsonDbImporter {
                 product.name, product.description, product.pictureUrl,
                 product.price, product.typeId, product.brandId));
     }
+
+    private void importDeliveryMethods(String encodedTypes) throws Exception {
+        CollectionType collectionType = objectMapper.getTypeFactory()
+                .constructCollectionType(ArrayList.class, DeliveryMethod.class);
+        List<DeliveryMethod> methods = objectMapper.readValue(encodedTypes, collectionType);
+
+        methods.forEach(method -> jdbcTemplate.update(
+                "insert into delivery_method (id, short_name, delivery_time, description, price) values (?, ?, ?, ?, ?);",
+                method.getId(), method.getShortName(), method.getDeliveryTime(),
+                method.getDescription(), method.getPrice()));
+    }
+
 
     private static class EncodedProduct {
         public String name;

@@ -3,6 +3,11 @@ package com.example.skinet;
 import com.example.skinet.config.AppConfigProperties;
 import com.example.skinet.core.entity.Product;
 import com.example.skinet.core.entity.ProductDTO;
+import com.example.skinet.core.entity.order.Order;
+import com.example.skinet.core.entity.order.OrderItem;
+import com.example.skinet.core.entity.order.OrderStatus;
+import com.example.skinet.dto.OrderDto;
+import com.example.skinet.dto.OrderItemDto;
 import com.example.skinet.service.JsonDbImporter;
 import com.example.skinet.service.UsersInitializer;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -43,6 +48,7 @@ public class SkinetApplication {
     ModelMapper modelMapper(AppConfigProperties configProperties) {
         ModelMapper mapper = new ModelMapper();
         Converter<String, String> urlToGlobal = ctx -> configProperties.getRootUrl() + ctx.getSource();
+        Converter<OrderStatus, String> orderStatusToString = ctx -> ctx.getSource().getValue();
 
         TypeMap<Product, ProductDTO> typeMap = mapper.createTypeMap(Product.class, ProductDTO.class);
         // this could be done by just overriding toSting, but in case we need
@@ -52,6 +58,18 @@ public class SkinetApplication {
 
         typeMap.addMappings(m -> m.using(urlToGlobal)
                 .map(Product::getPictureUrl, ProductDTO::setPictureUrl));
+
+        TypeMap<Order, OrderDto> orderToDtoMap = mapper.createTypeMap(Order.class, OrderDto.class);
+        orderToDtoMap.addMapping(src -> src.getDeliveryMethod().getPrice(), OrderDto::setShippingPrice);
+        orderToDtoMap.addMapping(src -> src.getDeliveryMethod().getShortName(), OrderDto::setDeliveryMethod);
+        orderToDtoMap.addMappings(m -> m.using(orderStatusToString)
+                .map(Order::getStatus, OrderDto::setStatus));
+
+        TypeMap<OrderItem, OrderItemDto> orderItemToDtoMap = mapper.createTypeMap(OrderItem.class, OrderItemDto.class);
+        orderItemToDtoMap.addMapping(src -> src.getItemOrdered().getProductId(), OrderItemDto::setProductId);
+        orderItemToDtoMap.addMapping(src -> src.getItemOrdered().getProductName(), OrderItemDto::setProductName);
+        orderItemToDtoMap.addMappings(m -> m.using(urlToGlobal)
+                .map(src -> src.getItemOrdered().getPictureUrl(), OrderItemDto::setPictureUrl));
 
         return mapper;
     }
