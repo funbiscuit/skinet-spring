@@ -18,7 +18,7 @@ export class ShopComponent implements OnInit {
   products?: Product[];
   brands: ProductBrand[] = [];
   types: ProductType[] = [];
-  shopParams = new ShopParams();
+  shopParams: ShopParams
   totalCount = 0;
   sortOptions = [
     {name: 'Alphabetical', value: 'name'},
@@ -27,27 +27,24 @@ export class ShopComponent implements OnInit {
   ];
 
   constructor(private shopService: ShopService) {
+    this.shopParams = shopService.getShopParams()
   }
 
   ngOnInit(): void {
-    this.getProducts()
+    this.getProducts(true)
     this.getBrands()
     this.getTypes()
   }
 
-  getProducts() {
-    this.shopService.getProducts(this.shopParams)
-      .subscribe(response => {
-        if (response != undefined) {
-          this.products = response.content
-          // page number starts from 0
-          this.shopParams.pageNumber = response.number
-          this.shopParams.pageSize = response.size
-          this.totalCount = response.totalElements
-        }
-      }, error => {
-        console.log(error)
-      })
+  getProducts(useCache = false) {
+    this.shopService.getProducts(useCache).subscribe(response => {
+      if (response != undefined) {
+        this.products = response.content
+        this.totalCount = response.totalElements
+      }
+    }, error => {
+      console.log(error)
+    })
   }
 
   getBrands() {
@@ -67,41 +64,50 @@ export class ShopComponent implements OnInit {
   }
 
   onBrandSelected(brandId: number) {
-    this.shopParams.brandId = brandId
-    this.shopParams.pageNumber = 0
+    const params = this.shopService.getShopParams()
+    params.brandId = brandId
+    params.pageNumber = 0
+    this.shopService.setShopParams(params)
     this.getProducts()
   }
 
   onTypeSelected(typeId: number) {
-    this.shopParams.typeId = typeId
-    this.shopParams.pageNumber = 0
+    const params = this.shopService.getShopParams()
+    params.typeId = typeId
+    params.pageNumber = 0
+    this.shopService.setShopParams(params)
     this.getProducts()
   }
 
   onSortSelected(sort: string) {
-    this.shopParams.sort = sort
-    this.shopParams.pageNumber = 0
-    //TODO this doesn't update selected page in pagination
+    const params = this.shopService.getShopParams()
+    params.sort = sort
+    params.pageNumber = 0
+    this.shopService.setShopParams(params)
     this.getProducts()
   }
 
   onPageChanged(page: number) {
-    if (this.shopParams.pageNumber !== page - 1) {
-      this.shopParams.pageNumber = page - 1;
-      this.getProducts()
+    const params = this.shopService.getShopParams()
+    if (params.pageNumber !== page - 1) {
+      params.pageNumber = page - 1;
+      this.shopService.setShopParams(params)
+      this.getProducts(true)
     }
   }
 
   onSearch() {
-    this.shopParams.search = this.searchTerm.nativeElement.value
-    this.shopParams.pageNumber = 0
+    const params = this.shopService.getShopParams()
+    params.search = this.searchTerm.nativeElement.value
+    params.pageNumber = 0
+    this.shopService.setShopParams(params)
     this.getProducts()
   }
 
   onReset() {
     this.searchTerm.nativeElement.value = ''
     this.shopParams = new ShopParams()
-    this.shopParams.pageNumber = 0
+    this.shopService.setShopParams(this.shopParams)
     this.getProducts()
   }
 }

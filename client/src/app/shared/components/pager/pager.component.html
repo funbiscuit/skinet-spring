@@ -2,6 +2,7 @@
   [boundaryLinks]="true"
   [totalItems]="totalCount"
   [itemsPerPage]="pageSize"
+  [ngModel]="pageNumber"
   (pageChanged)="onPagerChange($event.page)"
   previousText="&lsaquo;" nextText="&rsaquo;"
   firstText="&laquo;" lastText="&raquo;">

@@ -10,6 +10,7 @@
         >
           <option
             *ngFor="let item of sortOptions"
+            [selected]="shopParams.sort === item.value"
             [class.selected]="item.value === shopParams.sort"
             [value]="item.value"
           >
@@ -56,6 +57,7 @@
 
         <div class="form-inline" *ngIf="products">
           <input #search type="text" class="form-control mr-2"
+                 [value]="shopParams.search ?? ''"
                  style="width: 300px"
                  placeholder="Search" (keyup.enter)="onSearch()">
           <button class="btn btn-outline-primary my-2"
@@ -78,6 +80,7 @@
            *ngIf="totalCount && totalCount>0">
         <app-pager
           [pageSize]="shopParams.pageSize"
+          [pageNumber]="shopParams.pageNumber+1"
           [totalCount]="totalCount"
           (pageChanged)="onPageChanged($event)"
         >

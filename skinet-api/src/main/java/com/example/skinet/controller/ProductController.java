@@ -1,5 +1,6 @@
 package com.example.skinet.controller;
 
+import com.example.skinet.aop.CacheResponse;
 import com.example.skinet.core.entity.Product;
 import com.example.skinet.core.entity.ProductBrand;
 import com.example.skinet.core.entity.ProductDTO;
@@ -37,6 +38,7 @@ public class ProductController {
     private final ProductBrandService brandService;
     private final ModelMapper modelMapper;
 
+    @CacheResponse
     @GetMapping
     public ResponseEntity<Page<ProductDTO>> getProducts(
             @ParameterObject Pageable pageable,
@@ -53,6 +55,7 @@ public class ProductController {
                 pageable, products.getTotalElements()));
     }
 
+    @CacheResponse
     @ApiResponse(responseCode = "200", description = "Product is found",
             content = {@Content(schema = @Schema(implementation = ProductDTO.class))})
     @ApiResponse(responseCode = "400", description = "Invalid id supplied",
@@ -66,11 +69,13 @@ public class ProductController {
                 .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND)));
     }
 
+    @CacheResponse
     @GetMapping("/brands")
     public ResponseEntity<List<ProductBrand>> getProductBrands() {
         return ResponseEntity.ok(brandService.getProductBrands());
     }
 
+    @CacheResponse
     @GetMapping("/types")
     public ResponseEntity<List<ProductType>> getProductTypes() {
         return ResponseEntity.ok(typeService.getProductTypes());
