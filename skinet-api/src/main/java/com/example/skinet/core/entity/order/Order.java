@@ -53,12 +53,13 @@ public class Order {
     private String paymentIntentId;
 
     public Order(List<OrderItem> orderItems, String buyerEmail, OrderAddress shipToAddress,
-                 DeliveryMethod deliveryMethod, BigDecimal subtotal) {
+                 DeliveryMethod deliveryMethod, BigDecimal subtotal, String paymentIntentId) {
         this.buyerEmail = buyerEmail;
         this.shipToAddress = shipToAddress;
         this.deliveryMethod = deliveryMethod;
         this.orderItems = orderItems;
         this.subtotal = subtotal;
+        this.paymentIntentId = paymentIntentId;
 
         orderItems.forEach(item -> item.setOrder(this));
     }

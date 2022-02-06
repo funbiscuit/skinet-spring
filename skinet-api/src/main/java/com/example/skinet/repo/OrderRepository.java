@@ -17,4 +17,8 @@ public interface OrderRepository extends JpaRepository<Order, Integer> {
     @Query("select o from Order o join fetch o.orderItems items " +
             "join fetch o.deliveryMethod dm where o.buyerEmail = ?1 and o.id = ?2")
     Optional<Order> getUserOrderById(String email, Integer id);
+
+    @Query("select o from Order o join fetch o.deliveryMethod dm " +
+            "where o.paymentIntentId = ?1 ")
+    Optional<Order> getUserOrderByPaymentIntentId(String id);
 }

@@ -29,6 +29,7 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-devtools'
     implementation 'org.springdoc:springdoc-openapi-ui:1.6.5'
     implementation 'org.springdoc:springdoc-openapi-security:1.6.5'
+    implementation 'com.stripe:stripe-java:20.98.0'
     implementation 'org.flywaydb:flyway-core'
     implementation 'org.modelmapper:modelmapper:2.4.4'
     implementation 'redis.clients:jedis:3.8.0'

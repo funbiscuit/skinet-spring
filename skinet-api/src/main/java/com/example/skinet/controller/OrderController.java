@@ -28,10 +28,13 @@ public class OrderController {
 
     @GetMapping
     public ResponseEntity<List<OrderDto>> getOrdersForUser(Principal principal) {
-        return ResponseEntity.ok(orderService.getUserOrders(authService.getUserEmailFromPrincipal(principal))
-                .stream()
+        List<Order> userOrders = orderService.getUserOrders(authService.getUserEmailFromPrincipal(principal));
+
+        List<OrderDto> collect = userOrders.stream()
                 .map(o -> modelMapper.map(o, OrderDto.class))
-                .collect(Collectors.toList()));
+                .collect(Collectors.toList());
+
+        return ResponseEntity.ok(collect);
     }
 
     @GetMapping("/{id}")

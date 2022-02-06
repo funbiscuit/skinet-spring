@@ -23,6 +23,7 @@ public class OrderService {
     private final OrderRepository orderRepository;
     private final ProductService productService;
     private final BasketService basketService;
+    private final PaymentService paymentService;
 
     public long getDeliveryMethodsCount() {
         return deliveryMethodRepository.count();
@@ -49,14 +50,18 @@ public class OrderService {
                 .map(item -> item.getPrice().multiply(BigDecimal.valueOf(item.getQuantity())))
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
 
+        // find existing order and delete it
+        orderRepository.getUserOrderByPaymentIntentId(basket.getPaymentIntentId())
+                .ifPresent(order -> {
+                    orderRepository.delete(order);
+                    paymentService.createOrUpdatePaymentIntent(basketId);
+                });
+
         // create order
-        Order order = new Order(items, buyerEmail, shippingAddress, deliveryMethod, subtotal);
+        Order order = new Order(items, buyerEmail, shippingAddress, deliveryMethod, subtotal, basket.getPaymentIntentId());
 
         // save to db
         order = orderRepository.save(order);
-
-        // delete basket
-        basketService.deleteBasket(basketId);
 
         return order;
     }

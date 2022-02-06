@@ -6,6 +6,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.validation.annotation.Validated;
 
 import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
 
 @ConfigurationProperties("app")
 @Getter
@@ -15,11 +16,14 @@ public class AppConfigProperties {
     @NotBlank
     private String rootUrl;
 
+    @NotNull
     private JwtConfigProperties jwt;
+
+    @NotNull
+    private StripeProperties stripe;
 
     @Getter
     @Setter
-    @Validated
     public static class JwtConfigProperties {
         @NotBlank
         private String secret;
@@ -28,5 +32,15 @@ public class AppConfigProperties {
         private String issuer;
 
         private int daysToExpire;
+    }
+
+    @Getter
+    @Setter
+    public static class StripeProperties {
+        @NotBlank
+        private String publishableKey;
+
+        @NotBlank
+        private String secretKey;
     }
 }

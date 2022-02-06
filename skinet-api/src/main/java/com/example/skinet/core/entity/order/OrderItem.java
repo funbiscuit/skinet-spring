@@ -2,6 +2,7 @@ package com.example.skinet.core.entity.order;
 
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 
 import javax.persistence.*;
 import java.math.BigDecimal;
@@ -26,6 +27,7 @@ public class OrderItem {
 
     @ManyToOne
     @JoinColumn(name = "order_id")
+    @ToString.Exclude
     private Order order;
 
     public OrderItem(ProductItemOrdered itemOrdered, BigDecimal price, int quantity) {

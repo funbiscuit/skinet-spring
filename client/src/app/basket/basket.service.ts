@@ -2,7 +2,12 @@ import {Injectable} from '@angular/core';
 import {environment} from "../../environments/environment";
 import {HttpClient} from "@angular/common/http";
 import {BehaviorSubject} from "rxjs";
-import {Basket, BasketItem, BasketTotals, IBasket} from "../shared/models/basket";
+import {
+  Basket,
+  BasketItem,
+  BasketTotals,
+  IBasket
+} from "../shared/models/basket";
 import {map} from "rxjs/operators";
 import {Product} from "../shared/models/products";
 import {DeliveryMethod} from "../shared/models/deliveryMethod";
@@ -22,9 +27,24 @@ export class BasketService {
   constructor(private http: HttpClient) {
   }
 
+  createPaymentIntent() {
+    return this.http.post<IBasket>(this.baseUrl + 'payments/' + this.getCurrentBasketValue().id, {})
+      .pipe(
+        map(basket => {
+          this.basketSource.next(basket)
+        })
+      )
+  }
+
   setShippingPrice(deliveryMethod: DeliveryMethod) {
     this.shipping = deliveryMethod.price
+
+    const basket = this.getCurrentBasketValue()
+    basket.deliveryMethodId = deliveryMethod.id
+    basket.shippingPrice = this.shipping
+
     this.calculateTotals()
+    this.setBasket(basket)
   }
 
   getBasket(id: string) {
@@ -32,6 +52,7 @@ export class BasketService {
       .pipe(
         map(basket => {
           this.basketSource.next(basket)
+          this.shipping = basket.shippingPrice ?? 0
           this.calculateTotals()
         })
       )
@@ -134,7 +155,7 @@ export class BasketService {
     localStorage.removeItem('basket_id')
   }
 
-  private deleteBasket(basket: IBasket) {
+  deleteBasket(basket: IBasket) {
     return this.http.delete(this.baseUrl + 'basket?id=' + basket.id)
       .subscribe(() => {
         this.deleteLocalBasket()

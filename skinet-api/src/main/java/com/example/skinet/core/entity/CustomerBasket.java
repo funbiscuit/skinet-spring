@@ -7,6 +7,7 @@ import org.springframework.data.redis.core.RedisHash;
 import javax.validation.Valid;
 import javax.validation.constraints.NotBlank;
 import java.io.Serializable;
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -20,6 +21,14 @@ public class CustomerBasket implements Serializable {
 
     @Valid
     private List<BasketItem> items = new ArrayList<>();
+
+    private Integer deliveryMethodId;
+
+    private BigDecimal shippingPrice;
+
+    private String clientSecret;
+
+    private String paymentIntentId;
 
     public CustomerBasket(String id) {
         this.id = id;

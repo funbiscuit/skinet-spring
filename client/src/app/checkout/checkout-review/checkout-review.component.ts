@@ -1,4 +1,7 @@
-import {Component, OnInit} from '@angular/core';
+import {Component, Input, OnInit} from '@angular/core';
+import {BasketService} from "../../basket/basket.service";
+import {ToastrService} from "ngx-toastr";
+import {CdkStepper} from "@angular/cdk/stepper";
 
 @Component({
   selector: 'app-checkout-review',
@@ -7,10 +10,21 @@ import {Component, OnInit} from '@angular/core';
 })
 export class CheckoutReviewComponent implements OnInit {
 
-  constructor() {
+  @Input() appStepper!: CdkStepper
+
+
+  constructor(private basketService: BasketService,
+              private toastr: ToastrService) {
   }
 
   ngOnInit(): void {
   }
 
+  createPaymentIntent() {
+    return this.basketService.createPaymentIntent().subscribe(response => {
+      this.appStepper.next()
+    }, error => {
+      console.log(error)
+    })
+  }
 }

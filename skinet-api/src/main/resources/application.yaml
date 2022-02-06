@@ -13,6 +13,8 @@ spring:
         max-page-size: 50
   redis:
     host: localhost
+  config:
+    import: secrets.yaml
 
 server:
   port: 5001

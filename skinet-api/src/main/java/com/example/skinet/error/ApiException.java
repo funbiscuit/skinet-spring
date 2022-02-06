@@ -26,4 +26,9 @@ public class ApiException extends RuntimeException {
         return new ApiException(HttpStatus.NOT_FOUND,
                 String.format("User %s does not have an address", email));
     }
+
+    public static ApiException basketNotFound(String basketId) {
+        return new ApiException(HttpStatus.NOT_FOUND,
+                String.format("Basket %s was not found", basketId));
+    }
 }
