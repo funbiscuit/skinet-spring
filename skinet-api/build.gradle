@@ -43,6 +43,7 @@ dependencies {
 
 bootJar {
     exclude('secrets.yaml', 'static', 'dev-ssl.p12')
+    archiveFileName.set("${project.getName()}.${archiveExtension.get()}")
 }
 
 test {
