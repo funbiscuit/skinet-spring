@@ -5,13 +5,9 @@ import com.auth0.jwt.JWTVerifier;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import com.example.skinet.config.AppConfigProperties;
-import com.example.skinet.error.ErrorResponse;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.lang.NonNull;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -56,15 +52,7 @@ public class JwtAuthorizationFilter extends OncePerRequestFilter {
                 SecurityContextHolder.getContext()
                         .setAuthentication(new UsernamePasswordAuthenticationToken(username, null, authorities));
             } catch (Exception e) {
-                log.error("Unable to log in: {}", e.getMessage());
-
-                response.setStatus(HttpStatus.FORBIDDEN.value());
-                response.setContentType(MediaType.APPLICATION_JSON_VALUE);
-
-                new ObjectMapper().writeValue(response.getOutputStream(),
-                        new ErrorResponse(HttpStatus.FORBIDDEN, e.getMessage()));
-
-                return;
+                log.error("Attempt to log in failed: {}", e.getMessage());
             }
         }
 
