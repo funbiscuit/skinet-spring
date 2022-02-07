@@ -1,5 +1,6 @@
 package com.example.skinet.controller;
 
+import com.example.skinet.config.AppConfigProperties;
 import com.example.skinet.core.entity.CustomerBasket;
 import com.example.skinet.core.entity.order.Order;
 import com.example.skinet.error.ApiException;
@@ -23,8 +24,7 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/payments")
 public class PaymentController {
     private final PaymentService paymentService;
-
-    private final String whSecret = "whsec_516cb1c8c7a84dd79bbc3b7db0d8ebe58746c66636b2612dbaace0eb8b790d33";
+    private final AppConfigProperties appConfigProperties;
 
     @Secured("ROLE_USER")
     @PostMapping("{id}")
@@ -44,9 +44,8 @@ public class PaymentController {
         Event event = null;
 
         try {
-            event = Webhook.constructEvent(
-                    payload, sigHeader, whSecret
-            );
+            event = Webhook.constructEvent(payload, sigHeader,
+                    appConfigProperties.getStripe().getWebhookKey());
 //        }
 //        catch (JsonSyntaxException e) {
 //            // Invalid payload

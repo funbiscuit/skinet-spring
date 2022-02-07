@@ -41,6 +41,10 @@ dependencies {
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
 }
 
+bootJar {
+    exclude('secrets.yaml', 'static', 'dev-ssl.p12')
+}
+
 test {
     useJUnitPlatform()
 }

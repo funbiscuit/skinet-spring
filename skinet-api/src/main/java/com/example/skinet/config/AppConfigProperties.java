@@ -42,5 +42,8 @@ public class AppConfigProperties {
 
         @NotBlank
         private String secretKey;
+
+        @NotBlank
+        private String webhookKey;
     }
 }

@@ -6,13 +6,13 @@
 /* Importing Datepicker SCSS file. */
 @import "~ngx-bootstrap/datepicker/bs-datepicker";
 
+@import "~bootswatch/dist/united/bootstrap.min.css";
+
 /* Importing Font-Awesome SCSS file. */
 @import "~font-awesome/scss/font-awesome";
 
 /* Importing Toastr SCSS file */
 @import "~ngx-toastr/toastr-bs4-alert";
-
-@import "~bootswatch/dist/united/bootstrap.min.css";
 
 .xng-breadcrumb-root {
   padding: 8px 16px;

@@ -14,7 +14,7 @@ spring:
   redis:
     host: localhost
   config:
-    import: secrets.yaml
+    import: optional:secrets.yaml
 
 server:
   port: 5001

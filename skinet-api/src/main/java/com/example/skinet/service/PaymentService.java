@@ -65,6 +65,7 @@ public class PaymentService {
             try {
                 paymentIntent = PaymentIntent.create(intentCreateParams, requestOptions);
             } catch (StripeException e) {
+                e.printStackTrace();
                 throw new ApiException(HttpStatus.INTERNAL_SERVER_ERROR, "Can't create payment");
             }
             basket.setPaymentIntentId(paymentIntent.getId());
@@ -79,7 +80,8 @@ public class PaymentService {
                 PaymentIntent.retrieve(basket.getPaymentIntentId(), requestOptions)
                         .update(intentUpdateParams, requestOptions);
             } catch (StripeException e) {
-                throw new ApiException(HttpStatus.INTERNAL_SERVER_ERROR, "Can't create payment");
+                e.printStackTrace();
+                throw new ApiException(HttpStatus.INTERNAL_SERVER_ERROR, "Can't update payment");
             }
         }
 
