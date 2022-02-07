@@ -6,6 +6,8 @@ RUN rm -rf "/usr/share/nginx/html/*"
 ## copy images
 COPY skinet-api/src/main/resources/static /usr/share/nginx/html
 
+RUN ls -R
+
 ## copy artifacts from builder step
 COPY client/dist/client /usr/share/nginx/html
 
