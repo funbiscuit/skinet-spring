@@ -4,6 +4,11 @@ import {HttpClient} from "@angular/common/http";
 import {DeliveryMethod} from "../shared/models/deliveryMethod";
 import {map} from "rxjs/operators";
 import {Order, OrderToCreate} from "../shared/models/order";
+import {ReplaySubject} from "rxjs";
+
+interface StripeConfig {
+  publishableKey: string
+}
 
 @Injectable({
   providedIn: 'root'
@@ -11,8 +16,15 @@ import {Order, OrderToCreate} from "../shared/models/order";
 export class CheckoutService {
 
   baseUrl = environment.apiUrl
+  private stripeConfigSource = new ReplaySubject<StripeConfig>(1)
+  stripeConfig$ = this.stripeConfigSource.asObservable()
 
   constructor(private http: HttpClient) {
+    fetch('assets/config/stripe.json')
+      .then(response => response.json())
+      .then(data => {
+        this.stripeConfigSource.next(data)
+      });
   }
 
   getDeliveryMethods() {
