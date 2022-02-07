@@ -7,3 +7,6 @@ dhparam.pem
 # openssl req -x509 -nodes -days 3650 -newkey rsa:2048 -keyout server.key -out server.crt
 server.crt
 server.key
+
+# write stripe publishable key as json: {"publishableKey":"YOUR_KEY"}
+stripe.json

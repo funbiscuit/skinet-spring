@@ -11,6 +11,7 @@ services:
       - local
     volumes:
       - "./certs:/etc/ssl/certs/nginx"
+      - "./certs:/usr/share/nginx/html/assets/config"
 
   api:
     container_name: skinet-api
