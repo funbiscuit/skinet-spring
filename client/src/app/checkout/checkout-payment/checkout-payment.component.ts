@@ -1,18 +1,11 @@
-import {
-  AfterViewInit,
-  Component,
-  ElementRef,
-  Input,
-  OnDestroy,
-  OnInit,
-  ViewChild
-} from '@angular/core';
+import {AfterViewInit, Component, ElementRef, Input, OnDestroy, OnInit, ViewChild} from '@angular/core';
 import {AbstractControl, FormGroup} from "@angular/forms";
 import {BasketService} from "../../basket/basket.service";
 import {CheckoutService} from "../checkout.service";
 import {ToastrService} from "ngx-toastr";
 import {IBasket} from "../../shared/models/basket";
 import {NavigationExtras, Router} from "@angular/router";
+import {of} from "rxjs";
 
 declare var Stripe: any;
 
@@ -27,6 +20,7 @@ export class CheckoutPaymentComponent implements OnInit, AfterViewInit, OnDestro
   @ViewChild('cardExpiry', {static: true}) cardExpiryElement!: ElementRef
   @ViewChild('cardCvc', {static: true}) cardCvcElement!: ElementRef
 
+  stripeEnabled = false
   stripe: any
   cardNumber: any
   cardExpiry: any
@@ -57,27 +51,39 @@ export class CheckoutPaymentComponent implements OnInit, AfterViewInit, OnDestro
 
   ngAfterViewInit(): void {
     this.checkoutService.stripeConfig$.subscribe(config => {
-      this.stripe = Stripe(config.publishableKey)
-      const elements = this.stripe.elements()
+      this.stripeEnabled = config.publishableKey != "pk_test_YOUR_KEY"
 
-      this.cardNumber = elements.create('cardNumber')
-      this.cardNumber.mount(this.cardNumberElement.nativeElement)
-      this.cardNumber.addEventListener('change', this.cardHandler)
+      if (this.stripeEnabled) {
+        this.stripe = Stripe(config.publishableKey)
+        const elements = this.stripe.elements()
 
-      this.cardExpiry = elements.create('cardExpiry')
-      this.cardExpiry.mount(this.cardExpiryElement.nativeElement)
-      this.cardExpiry.addEventListener('change', this.cardHandler)
+        this.cardNumber = elements.create('cardNumber')
+        this.cardNumber.mount(this.cardNumberElement.nativeElement)
+        this.cardNumber.addEventListener('change', this.cardHandler)
 
-      this.cardCvc = elements.create('cardCvc')
-      this.cardCvc.mount(this.cardCvcElement.nativeElement)
-      this.cardCvc.addEventListener('change', this.cardHandler)
+        this.cardExpiry = elements.create('cardExpiry')
+        this.cardExpiry.mount(this.cardExpiryElement.nativeElement)
+        this.cardExpiry.addEventListener('change', this.cardHandler)
+
+        this.cardCvc = elements.create('cardCvc')
+        this.cardCvc.mount(this.cardCvcElement.nativeElement)
+        this.cardCvc.addEventListener('change', this.cardHandler)
+      } else {
+        console.log('Stripe key is: ' + config.publishableKey)
+        console.log('Stripe is disabled. Order status will be based on shipping country')
+        this.cardNumberValid = true
+        this.cardExpiryValid = true
+        this.cardCvcValid = true
+      }
     })
   }
 
   ngOnDestroy(): void {
-    this.cardNumber.destroy()
-    this.cardExpiry.destroy()
-    this.cardCvc.destroy()
+    if (this.stripeEnabled) {
+      this.cardNumber.destroy()
+      this.cardExpiry.destroy()
+      this.cardCvc.destroy()
+    }
   }
 
   onChange(event: any) {
@@ -139,13 +145,29 @@ export class CheckoutPaymentComponent implements OnInit, AfterViewInit, OnDestro
   }
 
   private async confirmPaymentWithStripe(basket: IBasket) {
-    return this.stripe.confirmCardPayment(basket.clientSecret, {
-      payment_method: {
-        card: this.cardNumber,
-        billing_details: {
-          name: this.checkoutForm.get('paymentForm')?.get('nameOnCard')?.value
+    if (this.stripeEnabled) {
+      return this.stripe.confirmCardPayment(basket.clientSecret, {
+        payment_method: {
+          card: this.cardNumber,
+          billing_details: {
+            name: this.checkoutForm.get('paymentForm')?.get('nameOnCard')?.value
+          }
         }
+      })
+    } else {
+      switch (this.checkoutForm.get('addressForm')?.value.country) {
+        case 'UK':
+          return of({
+            paymentIntent: null,
+            error: {
+              message: 'Can\'t pay for order to UK. ' +
+                'Choose USA for success or other country for Pending'
+            }
+          }).toPromise()
+        default:
+          return of({paymentIntent: 'ok'}).toPromise()
       }
-    })
+    }
+
   }
 }

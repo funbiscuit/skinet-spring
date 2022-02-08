@@ -60,6 +60,17 @@ public class OrderService {
         // create order
         Order order = new Order(items, buyerEmail, shippingAddress, deliveryMethod, subtotal, basket.getPaymentIntentId());
 
+        if (!paymentService.isStripeEnabled()) {
+            // when Stripe is disabled, automatically choose order
+            // status based on country
+            OrderStatus status = switch (shippingAddress.getCountry()) {
+                case "USA" -> OrderStatus.PaymentReceived;
+                case "UK" -> OrderStatus.PaymentFailed;
+                default -> OrderStatus.Pending;
+            };
+            order.setStatus(status);
+        }
+
         // save to db
         order = orderRepository.save(order);
 

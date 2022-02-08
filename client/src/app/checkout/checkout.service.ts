@@ -20,11 +20,11 @@ export class CheckoutService {
   stripeConfig$ = this.stripeConfigSource.asObservable()
 
   constructor(private http: HttpClient) {
-    fetch('assets/config/stripe.json')
-      .then(response => response.json())
-      .then(data => {
-        this.stripeConfigSource.next(data)
-      });
+    this.http.get<StripeConfig>('assets/config/stripe.json').subscribe(config => {
+      this.stripeConfigSource.next(config)
+    }, error => {
+      this.stripeConfigSource.next({publishableKey: "pk_test_YOUR_KEY"})
+    })
   }
 
   getDeliveryMethods() {

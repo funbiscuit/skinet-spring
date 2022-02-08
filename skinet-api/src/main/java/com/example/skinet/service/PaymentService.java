@@ -13,13 +13,17 @@ import com.stripe.net.RequestOptions;
 import com.stripe.param.PaymentIntentCreateParams;
 import com.stripe.param.PaymentIntentUpdateParams;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
+import javax.annotation.PostConstruct;
 import java.math.BigDecimal;
 import java.util.Optional;
 
+@Slf4j
 @RequiredArgsConstructor
 @Service
 public class PaymentService {
@@ -28,6 +32,16 @@ public class PaymentService {
     private final DeliveryMethodRepository deliveryMethodRepository;
     private final AppConfigProperties appConfigProperties;
     private final OrderRepository orderRepository;
+
+    @PostConstruct
+    public void init() {
+        if (!isStripeEnabled()) {
+            log.warn("Stripe secret key is set to: {}. Stripe is disabled!",
+                    appConfigProperties.getStripe().getSecretKey());
+            log.warn("Orders with shipping country USA will be successful, " +
+                    "UK - failed, all other - pending");
+        }
+    }
 
     public CustomerBasket createOrUpdatePaymentIntent(String basketId) {
         CustomerBasket basket = basketService.getBasket(basketId)
@@ -50,38 +64,41 @@ public class PaymentService {
                 .mapToLong(BigDecimal::longValueExact)
                 .sum();
 
-
-        RequestOptions requestOptions = RequestOptions.builder()
-                .setApiKey(appConfigProperties.getStripe().getSecretKey())
-                .build();
-
-        if (StringUtils.isBlank(basket.getPaymentIntentId())) {
-            PaymentIntentCreateParams intentCreateParams = PaymentIntentCreateParams.builder()
-                    .setAmount(itemsAmount + shippingAmount)
-                    .setCurrency("usd")
-//                    .addPaymentMethodType("card")
+        if (isStripeEnabled()) {
+            RequestOptions requestOptions = RequestOptions.builder()
+                    .setApiKey(appConfigProperties.getStripe().getSecretKey())
                     .build();
-            PaymentIntent paymentIntent;
-            try {
-                paymentIntent = PaymentIntent.create(intentCreateParams, requestOptions);
-            } catch (StripeException e) {
-                e.printStackTrace();
-                throw new ApiException(HttpStatus.INTERNAL_SERVER_ERROR, "Can't create payment");
+
+            if (StringUtils.isBlank(basket.getPaymentIntentId())) {
+                PaymentIntentCreateParams intentCreateParams = PaymentIntentCreateParams.builder()
+                        .setAmount(itemsAmount + shippingAmount)
+                        .setCurrency("usd")
+                        .build();
+                PaymentIntent paymentIntent;
+                try {
+                    paymentIntent = PaymentIntent.create(intentCreateParams, requestOptions);
+                } catch (StripeException e) {
+                    e.printStackTrace();
+                    throw new ApiException(HttpStatus.INTERNAL_SERVER_ERROR, "Can't create payment");
+                }
+                basket.setPaymentIntentId(paymentIntent.getId());
+                basket.setClientSecret(paymentIntent.getClientSecret());
+            } else {
+                PaymentIntentUpdateParams intentUpdateParams = PaymentIntentUpdateParams.builder()
+                        .setAmount(itemsAmount + shippingAmount)
+                        .build();
+
+                try {
+                    PaymentIntent.retrieve(basket.getPaymentIntentId(), requestOptions)
+                            .update(intentUpdateParams, requestOptions);
+                } catch (StripeException e) {
+                    e.printStackTrace();
+                    throw new ApiException(HttpStatus.INTERNAL_SERVER_ERROR, "Can't update payment");
+                }
             }
-            basket.setPaymentIntentId(paymentIntent.getId());
-            basket.setClientSecret(paymentIntent.getClientSecret());
         } else {
-            PaymentIntentUpdateParams intentUpdateParams = PaymentIntentUpdateParams.builder()
-                    .setAmount(itemsAmount + shippingAmount)
-//                    .addPaymentMethodType("card")
-                    .build();
-
-            try {
-                PaymentIntent.retrieve(basket.getPaymentIntentId(), requestOptions)
-                        .update(intentUpdateParams, requestOptions);
-            } catch (StripeException e) {
-                e.printStackTrace();
-                throw new ApiException(HttpStatus.INTERNAL_SERVER_ERROR, "Can't update payment");
+            if (StringUtils.isBlank(basket.getPaymentIntentId())) {
+                basket.setPaymentIntentId(RandomStringUtils.randomAlphanumeric(32));
             }
         }
 
@@ -102,5 +119,10 @@ public class PaymentService {
                     order.setStatus(OrderStatus.PaymentFailed);
                     orderRepository.save(order);
                 });
+    }
+
+    public boolean isStripeEnabled() {
+        return !appConfigProperties.getStripe().getSecretKey()
+                .equals("sk_test_YOUR_KEY");
     }
 }

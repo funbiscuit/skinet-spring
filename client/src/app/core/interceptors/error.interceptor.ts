@@ -1,10 +1,5 @@
 import {Injectable} from '@angular/core';
-import {
-  HttpEvent,
-  HttpHandler,
-  HttpInterceptor,
-  HttpRequest
-} from '@angular/common/http';
+import {HttpEvent, HttpHandler, HttpInterceptor, HttpRequest} from '@angular/common/http';
 import {Observable, throwError} from 'rxjs';
 import {NavigationExtras, Router} from "@angular/router";
 import {catchError} from "rxjs/operators";
@@ -33,7 +28,8 @@ export class ErrorInterceptor implements HttpInterceptor {
             this.toastService.error(error.error.message,
               error.error.status)
           }
-          if (error.status === 404) {
+          if (error.status === 404 && !request.url.endsWith('stripe.json')) {
+            console.log(request)
             this.router.navigateByUrl('/not-found')
           }
           if (error.status === 500) {

@@ -1,13 +1,26 @@
 # Skinet
 
-This code is based on repo https://github.com/TryCatchLearn/skinet for
-.NET+Angular course Instead of .NET it uses Spring Boot. Angular part is the
-same with minor tweaks. Otherwise, almost all functionality is identical.
+This code is based on repo https://github.com/TryCatchLearn/skinet for .NET+Angular course. Instead of .NET it uses
+Spring Boot (MVC, Data, Security) with JWT auth and OpenAPI. Angular module is the same with minor tweaks (for example,
+Stripe is optional). Functionality from user perspective is identical.
 
-docker-compose file contains necessary dependencies (PostgreSQL and Redis) to
-run development locally.
+# Development
 
-# Run built images locally
+`docker-compose.yaml` contains necessary dependencies (PostgreSQL and Redis) to run development locally.
+
+Client can be started with
+
+```shell
+ng serve
+```
+
+API with
+
+```shell
+gradlew :skinet-api:bootRun
+```
+
+# Run images of API and UI locally
 
 To run locally you need to generate ssl certificates. For example:
 
@@ -42,7 +55,7 @@ When running locally, webhook key should be acquired from Stripe CLI:
 
 ```shell
 stripe login
-stripe.exe listen --forward-to https://localhost:8443/api/payments/webhook --skip-verify
+stripe listen --forward-to https://localhost:8443/api/payments/webhook --skip-verify
 ```
 
 To run app just use following command:
@@ -53,5 +66,17 @@ docker-compose up -f docker-compose-hub.yaml
 
 Default user is `bob@gmail.com` with password `123`
 
-If Stripe keys were not provided, app will send 500 responses when trying to pay
-for the order.
+App can be tested without correct Stripe keys. For that you should use following values of secret and publishable keys:
+
+```
+app.stripe.publishable-key: pk_key_YOUR_KEY
+app.stripe.secret-key: sk_key_YOUR_KEY
+```
+
+In that case order status will be decided based on shipping country:
+
+| Country |      Status      |
+|---------|------------------|
+| USA     | Payment received |
+| UK      | Payment failed   |
+| Other   | Pending          |
