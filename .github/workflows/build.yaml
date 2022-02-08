@@ -81,3 +81,27 @@ jobs:
           file: client.Dockerfile
           push: true
           tags: funbiscuit/skinet-ui:latest
+
+  build-sample-docker:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+      - name: Generate sample keys
+        working-directory: certs
+        run: |
+          chmod +x generate-keys.sh
+          ./generate-keys.sh
+
+      - name: Generate sample docker-compose file
+        run: |
+          rm docker-compose.yaml
+          mv docker-compose-hub.yaml docker-compose.yaml
+
+      - name: Upload generated config
+        uses: actions/upload-artifact@v2
+        with:
+          name: skinet-docker
+          path: |
+            certs
+            docker-compose.yaml
